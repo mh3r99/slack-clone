@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Grid,
@@ -9,9 +9,31 @@ import {
   Message,
   Icon,
 } from "semantic-ui-react";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { db } from "../../firebase";
 
 const Register = () => {
-  const handleChange = (e) => {};
+  const [formData, setFormData] = useState({});
+  const { username, email, password, passwordConfirmation } = formData;
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const auth = getAuth();
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    const user = userCredential.user;
+  };
+
+  console.log(formData);
+
   return (
     <Grid textAlign="center" verticalAlign="middle" className="app">
       <Grid.Column style={{ maxWidth: 450 }}>
@@ -19,7 +41,7 @@ const Register = () => {
           <Icon name="puzzle piece" color="orange" />
           Register for DevChat
         </Header>
-        <Form size="large">
+        <Form size="large" onSubmit={handleSubmit}>
           <Segment stacked>
             <Form.Input
               fluid
@@ -29,6 +51,7 @@ const Register = () => {
               placeholder="Username"
               type="text"
               onChange={handleChange}
+              value={username}
             />
 
             <Form.Input
@@ -39,6 +62,7 @@ const Register = () => {
               placeholder="Email Address"
               type="email"
               onChange={handleChange}
+              value={email}
             />
 
             <Form.Input
@@ -49,6 +73,7 @@ const Register = () => {
               placeholder="Password"
               type="password"
               onChange={handleChange}
+              value={password}
             />
 
             <Form.Input
@@ -59,6 +84,7 @@ const Register = () => {
               placeholder="Password Confirmation"
               type="password"
               onChange={handleChange}
+              value={passwordConfirmation}
             />
 
             <Button color="orange" fluid size="large">
