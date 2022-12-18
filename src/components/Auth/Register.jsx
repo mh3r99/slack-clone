@@ -9,11 +9,20 @@ import {
   Message,
   Icon,
 } from "semantic-ui-react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import md5 from "md5";
 import { db } from "../../firebase";
+
+import { getDatabase, ref, set } from "firebase/database";
 
 const Register = () => {
   const [formData, setFormData] = useState({});
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { username, email, password, passwordConfirmation } = formData;
 
   const handleChange = (e) => {
@@ -22,17 +31,69 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    if (isFormValid()) {
+      setLoading(true);
 
-    const user = userCredential.user;
+      try {
+        const auth = getAuth();
+        const database = getDatabase();
+
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        const user = userCredential.user;
+
+        await updateProfile(user, {
+          displayName: username,
+          photoURL: `http://gravatar.com/avatar/${md5(user.email)}?d=identicon`,
+        });
+
+        await set(ref(database, "users/" + user.uid), {
+          name: user.displayName,
+          avatar: user.photoURL,
+        });
+      } catch (error) {
+        setError(error.message);
+      }
+
+      setLoading(false);
+    }
   };
 
-  console.log(formData);
+  const isFormValid = () => {
+    if (isFormEmpty(formData)) {
+      setError("Fill in all fields");
+      return false;
+    } else if (!isPasswordValid(password, passwordConfirmation)) {
+      setError("Password is invalid");
+      return false;
+    } else {
+      setError(null);
+      return true;
+    }
+  };
+
+  const isFormEmpty = ({ username, email, password, passwordConfirmation }) =>
+    !username?.length ||
+    !email?.length ||
+    !password?.length ||
+    !passwordConfirmation?.length;
+
+  const isPasswordValid = (password, passwordConfirmation) => {
+    if (password?.length < 6 || passwordConfirmation?.length < 6) {
+      return false;
+    } else if (password !== passwordConfirmation) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handelInputError = (error, inputName) =>
+    error?.toLowerCase().includes(inputName) ? "error" : "";
 
   return (
     <Grid textAlign="center" verticalAlign="middle" className="app">
@@ -51,7 +112,7 @@ const Register = () => {
               placeholder="Username"
               type="text"
               onChange={handleChange}
-              value={username}
+              value={username || ""}
             />
 
             <Form.Input
@@ -62,7 +123,8 @@ const Register = () => {
               placeholder="Email Address"
               type="email"
               onChange={handleChange}
-              value={email}
+              value={email || ""}
+              className={handelInputError(error, "email")}
             />
 
             <Form.Input
@@ -73,7 +135,8 @@ const Register = () => {
               placeholder="Password"
               type="password"
               onChange={handleChange}
-              value={password}
+              value={password || ""}
+              className={handelInputError(error, "password")}
             />
 
             <Form.Input
@@ -84,14 +147,22 @@ const Register = () => {
               placeholder="Password Confirmation"
               type="password"
               onChange={handleChange}
-              value={passwordConfirmation}
+              value={passwordConfirmation || ""}
+              className={handelInputError(error, "password")}
             />
 
-            <Button color="orange" fluid size="large">
+            <Button
+              disabled={loading}
+              className={loading ? "loading" : ""}
+              color="orange"
+              fluid
+              size="large"
+            >
               Submit
             </Button>
           </Segment>
         </Form>
+        {error && <Message error>{error}</Message>}
         <Message>
           Already a user? <Link to="/login">Login</Link>
         </Message>
