@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Grid,
   Form,
@@ -18,12 +18,22 @@ import md5 from "md5";
 import { db } from "../../firebase";
 
 import { getDatabase, ref, set } from "firebase/database";
+import { useAuthStatus } from "../hooks/useAuthStatus";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const { username, email, password, passwordConfirmation } = formData;
+
+  const { loggedIn, checkingStatus } = useAuthStatus();
+
+  useEffect(() => {
+    if (loggedIn) {
+      navigate("/");
+    }
+  }, [loggedIn]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -95,80 +105,81 @@ const Register = () => {
   const handelInputError = (error, inputName) =>
     error?.toLowerCase().includes(inputName) ? "error" : "";
 
-  return (
-    <Grid textAlign="center" verticalAlign="middle" className="app">
-      <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h1" icon color="orange" textAlign="center">
-          <Icon name="puzzle piece" color="orange" />
-          Register for DevChat
-        </Header>
-        <Form size="large" onSubmit={handleSubmit}>
-          <Segment stacked>
-            <Form.Input
-              fluid
-              name="username"
-              icon="user"
-              iconPosition="left"
-              placeholder="Username"
-              type="text"
-              onChange={handleChange}
-              value={username || ""}
-            />
+  if (!checkingStatus)
+    return (
+      <Grid textAlign="center" verticalAlign="middle" className="app">
+        <Grid.Column style={{ maxWidth: 450 }}>
+          <Header as="h1" icon color="orange" textAlign="center">
+            <Icon name="puzzle piece" color="orange" />
+            Register for DevChat
+          </Header>
+          <Form size="large" onSubmit={handleSubmit}>
+            <Segment stacked>
+              <Form.Input
+                fluid
+                name="username"
+                icon="user"
+                iconPosition="left"
+                placeholder="Username"
+                type="text"
+                onChange={handleChange}
+                value={username || ""}
+              />
 
-            <Form.Input
-              fluid
-              name="email"
-              icon="mail"
-              iconPosition="left"
-              placeholder="Email Address"
-              type="email"
-              onChange={handleChange}
-              value={email || ""}
-              className={handelInputError(error, "email")}
-            />
+              <Form.Input
+                fluid
+                name="email"
+                icon="mail"
+                iconPosition="left"
+                placeholder="Email Address"
+                type="email"
+                onChange={handleChange}
+                value={email || ""}
+                className={handelInputError(error, "email")}
+              />
 
-            <Form.Input
-              fluid
-              name="password"
-              icon="lock"
-              iconPosition="left"
-              placeholder="Password"
-              type="password"
-              onChange={handleChange}
-              value={password || ""}
-              className={handelInputError(error, "password")}
-            />
+              <Form.Input
+                fluid
+                name="password"
+                icon="lock"
+                iconPosition="left"
+                placeholder="Password"
+                type="password"
+                onChange={handleChange}
+                value={password || ""}
+                className={handelInputError(error, "password")}
+              />
 
-            <Form.Input
-              fluid
-              name="passwordConfirmation"
-              icon="repeat"
-              iconPosition="left"
-              placeholder="Password Confirmation"
-              type="password"
-              onChange={handleChange}
-              value={passwordConfirmation || ""}
-              className={handelInputError(error, "password")}
-            />
+              <Form.Input
+                fluid
+                name="passwordConfirmation"
+                icon="repeat"
+                iconPosition="left"
+                placeholder="Password Confirmation"
+                type="password"
+                onChange={handleChange}
+                value={passwordConfirmation || ""}
+                className={handelInputError(error, "password")}
+              />
 
-            <Button
-              disabled={loading}
-              className={loading ? "loading" : ""}
-              color="orange"
-              fluid
-              size="large"
-            >
-              Submit
-            </Button>
-          </Segment>
-        </Form>
-        {error && <Message error>{error}</Message>}
-        <Message>
-          Already a user? <Link to="/login">Login</Link>
-        </Message>
-      </Grid.Column>
-    </Grid>
-  );
+              <Button
+                disabled={loading}
+                className={loading ? "loading" : ""}
+                color="orange"
+                fluid
+                size="large"
+              >
+                Submit
+              </Button>
+            </Segment>
+          </Form>
+          {error && <Message error>{error}</Message>}
+          <Message>
+            Already a user? <Link to="/login">Login</Link>
+          </Message>
+        </Grid.Column>
+      </Grid>
+    );
 };
 
 export default Register;
