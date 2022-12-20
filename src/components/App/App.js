@@ -1,43 +1,22 @@
-import { useEffect } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "../Auth/Login";
-import Register from "../Auth/Register";
-import { useDispatch, useSelector } from "react-redux";
-import { getAuth } from "firebase/auth";
-import { setLoggedUser } from "../../store/features/userSlice";
-import Spinner from "../Spinner";
+import { Grid } from "semantic-ui-react";
+import ColorPanel from "../ColorPanel/ColorPanel";
+import SidePanel from "../SidePanel/SidePanel";
+import Messages from "../Messages/Messages";
+import MetaPanel from "../MetaPanel/MetaPanel";
 
 function App() {
-  const dispatch = useDispatch();
-  const { isLoading } = useSelector((state) => state.user);
-  const auth = getAuth();
-
-  console.log(isLoading);
-
-  useEffect(() => {
-    const unsubscribed = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        dispatch(setLoggedUser(user));
-      }
-    });
-
-    return () => unsubscribed();
-  }, [dispatch]);
-
   return (
-    <>
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
-        </BrowserRouter>
-      )}
-    </>
+    <Grid columns="equal" className="app" style={{ background: "#eee" }}>
+      <ColorPanel />
+      <SidePanel />
+      <Grid.Column style={{ marginLeft: 320 }}>
+        <Messages />
+      </Grid.Column>
+      <Grid.Column width={4}>
+        <MetaPanel />
+      </Grid.Column>
+    </Grid>
   );
 }
 
