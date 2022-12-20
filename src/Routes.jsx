@@ -16,7 +16,14 @@ const AppRoutes = () => {
   useEffect(() => {
     const unsubscribed = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        dispatch(setLoggedUser(user));
+        dispatch(
+          setLoggedUser({
+            id: user.uid,
+            name: user.displayName,
+            email: user.email,
+            avatar: user.photoURL,
+          })
+        );
       }
     });
 
