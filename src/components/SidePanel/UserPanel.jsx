@@ -1,31 +1,30 @@
 import React from "react";
-import { Dropdown, Grid, Header, Icon } from "semantic-ui-react";
+import { Dropdown, Grid, Header, Icon, Image } from "semantic-ui-react";
 import { getAuth, signOut } from "firebase/auth";
 
-const UserPanel = () => {
+const UserPanel = ({ currentUser }) => {
   const handleSignOut = () => {
     const auth = getAuth();
-    signOut(auth).then(() => {
-      console.log("sign out");
-    });
+    signOut(auth);
   };
+
   const dropdownOptions = [
     {
       key: "user",
       text: (
-        <span>
-          Signed in as <strong>Users</strong>
-        </span>
+        <div>
+          Signed in as <strong>{currentUser.name}</strong>
+        </div>
       ),
       disabled: true,
     },
     {
       key: "avatar",
-      text: <span>Change Avatar</span>,
+      text: <div>Change Avatar</div>,
     },
     {
       key: "signout",
-      text: <span onClick={handleSignOut}>Sign Out</span>,
+      text: <div onClick={handleSignOut}>Sign Out</div>,
     },
   ];
 
@@ -39,7 +38,15 @@ const UserPanel = () => {
           </Header>
         </Grid.Row>
         <Header style={{ padding: "0.25em" }} as="h4" inverted>
-          <Dropdown trigger={<span>User</span>} options={dropdownOptions} />
+          <Dropdown
+            trigger={
+              <span>
+                <Image src={currentUser.avatar} avatar spaced="right" />
+                {currentUser.name}
+              </span>
+            }
+            options={dropdownOptions}
+          />
         </Header>
       </Grid.Column>
     </Grid>

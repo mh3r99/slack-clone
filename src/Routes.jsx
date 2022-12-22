@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import App from "./components/App/App";
 import { useDispatch, useSelector } from "react-redux";
 import Spinner from "./components/Spinner";
@@ -10,7 +10,6 @@ import { clearUser, setLoggedUser } from "./store/features/userSlice";
 
 const AppRoutes = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { isLoading } = useSelector((state) => state.user);
   const auth = getAuth();
 
@@ -26,13 +25,13 @@ const AppRoutes = () => {
           })
         );
       } else {
-        navigate("/login");
         dispatch(clearUser());
       }
     });
 
     return () => unsubscribed();
   }, [dispatch]);
+
   return (
     <>
       {isLoading ? (

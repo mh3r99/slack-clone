@@ -47,11 +47,12 @@ const Login = () => {
         );
 
         const user = userCredential.user;
+
+        setError(null);
       } catch (error) {
         setError(error.message);
       }
 
-      setError(null);
       setLoading(false);
     }
   };
