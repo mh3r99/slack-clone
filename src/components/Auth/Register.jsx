@@ -16,7 +16,6 @@ import {
 } from "firebase/auth";
 import md5 from "md5";
 import { db } from "../../firebase";
-
 import { getDatabase, ref, set } from "firebase/database";
 import { useAuthStatus } from "../hooks/useAuthStatus";
 

@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Button, Form, Icon, Input, Menu, Modal } from "semantic-ui-react";
+import { getDatabase, ref, set, child, push } from "firebase/database";
 
-const Channels = () => {
+const Channels = ({ currentUser }) => {
   const [channels, setChannels] = useState([]);
   const [modal, setModal] = useState(false);
   const [formData, setFormData] = useState({
     channelName: "",
     channelDetails: "",
   });
+  const { channelName, channelDetails } = formData;
 
   const handleChange = (e) => {
     setFormData({
@@ -15,6 +17,35 @@ const Channels = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isFormValid()) {
+      const database = getDatabase();
+
+      const key = push(child(ref(database), "channels")).key;
+
+      const newChannel = {
+        id: key,
+        name: channelName,
+        details: channelDetails,
+        createdBy: {
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+        },
+      };
+
+      await set(ref(database, "channels/" + key), newChannel);
+
+      setFormData({
+        channelName: "",
+        channelDetails: "",
+      });
+      setModal(false);
+    }
+  };
+
+  const isFormValid = () => channelName && channelDetails;
 
   return (
     <>
@@ -34,7 +65,7 @@ const Channels = () => {
       <Modal basic open={modal} onClose={() => setModal(false)}>
         <Modal.Header>Add a Channel</Modal.Header>
         <Modal.Content>
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <Form.Field>
               <Input
                 fluid
@@ -54,7 +85,7 @@ const Channels = () => {
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="green" inverted>
+          <Button color="green" inverted onClick={handleSubmit}>
             <Icon name="checkmark" /> Add
           </Button>
           <Button color="red" inverted onClick={() => setModal(false)}>
