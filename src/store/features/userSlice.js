@@ -13,10 +13,13 @@ const userSlice = createSlice({
       state.currentUser = action.payload;
       state.isLoading = false;
     },
-    logout: (state, action) => (state = initialState),
+    clearUser: (state, action) => {
+      state.currentUser = null;
+      state.isLoading = false;
+    },
   },
 });
 
-export const { setLoggedUser, logout } = userSlice.actions;
+export const { setLoggedUser, clearUser } = userSlice.actions;
 
 export default userSlice.reducer;

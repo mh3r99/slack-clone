@@ -1,15 +1,16 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import App from "./components/App/App";
 import { useDispatch, useSelector } from "react-redux";
 import Spinner from "./components/Spinner";
 import { getAuth } from "firebase/auth";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
-import { setLoggedUser } from "./store/features/userSlice";
+import { clearUser, setLoggedUser } from "./store/features/userSlice";
 
 const AppRoutes = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isLoading } = useSelector((state) => state.user);
   const auth = getAuth();
 
@@ -24,6 +25,9 @@ const AppRoutes = () => {
             avatar: user.photoURL,
           })
         );
+      } else {
+        navigate("/login");
+        dispatch(clearUser());
       }
     });
 
@@ -34,13 +38,11 @@ const AppRoutes = () => {
       {isLoading ? (
         <Spinner />
       ) : (
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
       )}
     </>
   );
