@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form, Icon, Input, Menu, Modal } from "semantic-ui-react";
-import { getDatabase, ref, set, child, push } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  set,
+  child,
+  push,
+  onChildAdded,
+} from "firebase/database";
 
 const Channels = ({ currentUser }) => {
+  const database = getDatabase();
+  const channelsRef = ref(database, "channels");
   const [channels, setChannels] = useState([]);
   const [modal, setModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -10,6 +19,19 @@ const Channels = ({ currentUser }) => {
     channelDetails: "",
   });
   const { channelName, channelDetails } = formData;
+
+  useEffect(() => {
+    addListeners();
+  }, []);
+
+  const addListeners = () => {
+    let loadedChannels = [];
+
+    onChildAdded(channelsRef, (data) => {
+      loadedChannels.push(data.val());
+      setChannels(loadedChannels);
+    });
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -21,9 +43,7 @@ const Channels = ({ currentUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isFormValid()) {
-      const database = getDatabase();
-
-      const key = push(child(ref(database), "channels")).key;
+      const key = push(channelsRef).key;
 
       const newChannel = {
         id: key,
@@ -35,17 +55,33 @@ const Channels = ({ currentUser }) => {
         },
       };
 
-      await set(ref(database, "channels/" + key), newChannel);
+      await set(child(channelsRef, key), newChannel);
 
       setFormData({
         channelName: "",
         channelDetails: "",
       });
+
+      addListeners();
+
       setModal(false);
     }
   };
 
   const isFormValid = () => channelName && channelDetails;
+
+  const displayChannels = () =>
+    channels.length > 0 &&
+    channels.map((channel) => (
+      <Menu.Item
+        key={channel.id}
+        onClick={() => console.log(channel)}
+        name={channel.name}
+        style={{ opacity: 0.7 }}
+      >
+        # {channel.name}
+      </Menu.Item>
+    ));
 
   return (
     <>
@@ -60,6 +96,7 @@ const Channels = ({ currentUser }) => {
           </span>{" "}
           ({channels.length}) <Icon name="add" onClick={() => setModal(true)} />
         </Menu.Item>
+        {displayChannels()}
       </Menu.Menu>
 
       <Modal basic open={modal} onClose={() => setModal(false)}>
