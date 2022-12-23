@@ -16,7 +16,9 @@ const Channels = ({ currentUser }) => {
   const database = getDatabase();
   const channelsRef = ref(database, "channels");
   const [channels, setChannels] = useState([]);
+  const [activeChannel, setActiveChannel] = useState("");
   const [modal, setModal] = useState(false);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [formData, setFormData] = useState({
     channelName: "",
     channelDetails: "",
@@ -27,9 +29,17 @@ const Channels = ({ currentUser }) => {
     addListeners();
   }, []);
 
+  useEffect(() => {
+    if (firstLoad && channels.length > 0) {
+      let firstChannel = channels[0];
+      dispatch(setCurrentChannel(firstChannel));
+      setActiveChannel(firstChannel.id);
+      setFirstLoad(false);
+    }
+  }, [channels]);
+
   const addListeners = () => {
     let loadedChannels = [];
-
     onChildAdded(channelsRef, (data) => {
       loadedChannels.push(data.val());
       setChannels(loadedChannels);
@@ -65,22 +75,26 @@ const Channels = ({ currentUser }) => {
         channelDetails: "",
       });
 
-      addListeners();
-
       setModal(false);
     }
   };
 
   const isFormValid = () => channelName && channelDetails;
 
+  const changeChannel = (channel) => {
+    setActiveChannel(channel.id);
+    dispatch(setCurrentChannel(channel));
+  };
+
   const displayChannels = () =>
     channels.length > 0 &&
     channels.map((channel) => (
       <Menu.Item
         key={channel.id}
-        onClick={() => dispatch(setCurrentChannel(channel))}
+        onClick={() => changeChannel(channel)}
         name={channel.name}
         style={{ opacity: 0.7 }}
+        active={channel.id === activeChannel}
       >
         # {channel.name}
       </Menu.Item>
