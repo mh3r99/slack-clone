@@ -8,8 +8,11 @@ import {
   push,
   onChildAdded,
 } from "firebase/database";
+import { useDispatch } from "react-redux";
+import { setCurrentChannel } from "../../store/features/channelsSlice";
 
 const Channels = ({ currentUser }) => {
+  const dispatch = useDispatch();
   const database = getDatabase();
   const channelsRef = ref(database, "channels");
   const [channels, setChannels] = useState([]);
@@ -75,7 +78,7 @@ const Channels = ({ currentUser }) => {
     channels.map((channel) => (
       <Menu.Item
         key={channel.id}
-        onClick={() => console.log(channel)}
+        onClick={() => dispatch(setCurrentChannel(channel))}
         name={channel.name}
         style={{ opacity: 0.7 }}
       >
