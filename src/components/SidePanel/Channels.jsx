@@ -7,6 +7,7 @@ import {
   child,
   push,
   onChildAdded,
+  off,
 } from "firebase/database";
 import { useDispatch } from "react-redux";
 import { setCurrentChannel } from "../../store/features/channelsSlice";
@@ -27,6 +28,8 @@ const Channels = ({ currentUser }) => {
 
   useEffect(() => {
     addListeners();
+
+    return () => off(channelsRef);
   }, []);
 
   useEffect(() => {
