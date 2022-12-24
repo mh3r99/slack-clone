@@ -1,7 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
+import { push, child, serverTimestamp } from "firebase/database";
 
-const MessageForm = () => {
+const MessageForm = ({ messagesRef, currentChannel, currentUser }) => {
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (message) {
+      setLoading(true);
+
+      const newMessage = {
+        content: message,
+        user: {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+        },
+        timestamp: serverTimestamp(),
+      };
+
+      await push(child(messagesRef, currentChannel.id), newMessage);
+
+      setLoading(false);
+      setMessage("");
+    }
+  };
+
   return (
     <Segment className="message__form">
       <Input
@@ -11,6 +36,8 @@ const MessageForm = () => {
         label={<Button icon="add" />}
         labelPosition="left"
         placeholder="Write your message"
+        onChange={(e) => setMessage(e.target.value)}
+        value={message}
       />
       <Button.Group icon widths={2}>
         <Button
@@ -18,6 +45,8 @@ const MessageForm = () => {
           content="Add Reply"
           labelPosition="left"
           icon="edit"
+          onClick={sendMessage}
+          disabled={loading}
         />
         <Button
           color="teal"

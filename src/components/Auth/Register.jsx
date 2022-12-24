@@ -16,7 +16,7 @@ import {
 } from "firebase/auth";
 import md5 from "md5";
 import { db } from "../../firebase";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, child } from "firebase/database";
 import { useAuthStatus } from "../hooks/useAuthStatus";
 
 const Register = () => {
@@ -25,6 +25,9 @@ const Register = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const { username, email, password, passwordConfirmation } = formData;
+
+  const database = getDatabase();
+  const usersRef = ref(database, "users");
 
   const { loggedIn, checkingStatus } = useAuthStatus();
 
@@ -45,7 +48,6 @@ const Register = () => {
 
       try {
         const auth = getAuth();
-        const database = getDatabase();
 
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -60,7 +62,7 @@ const Register = () => {
           photoURL: `http://gravatar.com/avatar/${md5(user.email)}?d=identicon`,
         });
 
-        await set(ref(database, "users/" + user.uid), {
+        await set(child(usersRef, user.uid), {
           name: user.displayName,
           avatar: user.photoURL,
         });

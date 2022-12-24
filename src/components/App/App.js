@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 
 function App() {
   const { currentUser } = useSelector((state) => state.user);
+  const { currentChannel } = useSelector((state) => state.channels);
 
   return (
     <>
@@ -19,7 +20,10 @@ function App() {
           <ColorPanel />
           <SidePanel currentUser={currentUser} />
           <Grid.Column style={{ marginLeft: 320 }}>
-            <Messages />
+            <Messages
+              currentChannel={currentChannel}
+              currentUser={currentUser}
+            />
           </Grid.Column>
           <Grid.Column width={4}>
             <MetaPanel />
