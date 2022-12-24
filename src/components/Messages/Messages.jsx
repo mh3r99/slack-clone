@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Segment, Comment } from "semantic-ui-react";
 import MessageForm from "./MessageForm";
 import MessagesHeader from "./MessagesHeader";
-import { getDatabase, ref, child, onChildAdded } from "firebase/database";
+import { getDatabase, ref, child, onChildAdded, off } from "firebase/database";
 import Message from "./Message";
 
 const Messages = ({ currentChannel, currentUser }) => {
@@ -13,21 +13,20 @@ const Messages = ({ currentChannel, currentUser }) => {
   const messagesRef = ref(database, "messages");
 
   useEffect(() => {
-    if (currentChannel && currentUser) {
-      addListeners(currentChannel.id);
+    if (currentChannel) {
+      addMessageListener();
     }
-  }, [currentChannel, currentUser]);
 
-  const addListeners = (channelId) => {
-    addMessageListener(channelId);
-  };
+    return () => {
+      setMessages([]);
+      setMessagesLoading(true);
+      off(messagesRef);
+    };
+  }, [currentChannel]);
 
-  const addMessageListener = (channelId) => {
-    let loadedMessages = [];
-
-    onChildAdded(child(messagesRef, channelId), (data) => {
-      loadedMessages.push(data.val());
-      setMessages(loadedMessages);
+  const addMessageListener = () => {
+    onChildAdded(child(messagesRef, currentChannel.id), (data) => {
+      setMessages((prev) => [...prev, data.val()]);
       setMessagesLoading(false);
     });
   };
@@ -53,6 +52,7 @@ const Messages = ({ currentChannel, currentUser }) => {
         messagesRef={messagesRef}
         currentChannel={currentChannel}
         currentUser={currentUser}
+        addMessageListener={addMessageListener}
       />
     </>
   );

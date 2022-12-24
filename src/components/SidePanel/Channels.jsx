@@ -42,10 +42,8 @@ const Channels = ({ currentUser }) => {
   }, [channels]);
 
   const addListeners = () => {
-    let loadedChannels = [];
     onChildAdded(channelsRef, (data) => {
-      loadedChannels.push(data.val());
-      setChannels(loadedChannels);
+      setChannels((prev) => [...prev, data.val()]);
     });
   };
 
