@@ -31,8 +31,6 @@ const Messages = ({ currentChannel, currentUser }) => {
     });
   };
 
-  console.log(messages);
-
   return (
     <>
       <MessagesHeader />

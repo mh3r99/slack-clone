@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
 import { push, child, serverTimestamp } from "firebase/database";
+import FileModal from "./FileModal";
 
 const MessageForm = ({ messagesRef, currentChannel, currentUser }) => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState(false);
 
   const sendMessage = async () => {
     if (message) {
@@ -53,7 +55,9 @@ const MessageForm = ({ messagesRef, currentChannel, currentUser }) => {
           content="Upload media"
           labelPosition="right"
           icon="cloud upload"
+          onClick={() => setModal(true)}
         />
+        <FileModal modal={modal} closeModal={() => setModal(false)} />
       </Button.Group>
     </Segment>
   );
