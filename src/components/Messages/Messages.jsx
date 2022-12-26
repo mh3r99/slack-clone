@@ -8,6 +8,7 @@ import Message from "./Message";
 const Messages = ({ currentChannel, currentUser }) => {
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
+  const [progressBar, setProgressBar] = useState(false);
 
   const database = getDatabase();
   const messagesRef = ref(database, "messages");
@@ -31,11 +32,21 @@ const Messages = ({ currentChannel, currentUser }) => {
     });
   };
 
+  const isProgressBarVisible = (percent) => {
+    if (percent > 0) {
+      setProgressBar(true);
+    } else {
+      setProgressBar(false);
+    }
+  };
+
   return (
     <>
       <MessagesHeader />
       <Segment>
-        <Comment.Group className="messages">
+        <Comment.Group
+          className={progressBar ? "messages__progress" : "messages"}
+        >
           {messages.length > 0 &&
             messages.map((message) => (
               <Message
@@ -50,7 +61,7 @@ const Messages = ({ currentChannel, currentUser }) => {
         messagesRef={messagesRef}
         currentChannel={currentChannel}
         currentUser={currentUser}
-        addMessageListener={addMessageListener}
+        isProgressBarVisible={isProgressBarVisible}
       />
     </>
   );

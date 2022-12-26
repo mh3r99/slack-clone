@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
 import { push, child, serverTimestamp } from "firebase/database";
 import FileModal from "./FileModal";
@@ -11,12 +11,21 @@ import {
 } from "firebase/storage";
 import ProgressBar from "./ProgressBar";
 
-const MessageForm = ({ messagesRef, currentChannel, currentUser }) => {
+const MessageForm = ({
+  messagesRef,
+  currentChannel,
+  currentUser,
+  isProgressBarVisible,
+}) => {
   const [message, setMessage] = useState("");
   const [uploadState, setUploadState] = useState("");
   const [percentUploaded, setPercentUploaded] = useState(0);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
+
+  useEffect(() => {
+    isProgressBarVisible(percentUploaded);
+  }, [percentUploaded]);
 
   const sendMessage = async (fileUrl = null) => {
     if (message || fileUrl) {
