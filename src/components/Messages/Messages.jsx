@@ -9,6 +9,7 @@ const Messages = ({ currentChannel, currentUser }) => {
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [progressBar, setProgressBar] = useState(false);
+  const [numUniqueUsers, setNumUniqueUsers] = useState(0);
 
   const database = getDatabase();
   const messagesRef = ref(database, "messages");
@@ -25,6 +26,10 @@ const Messages = ({ currentChannel, currentUser }) => {
     };
   }, [currentChannel]);
 
+  useEffect(() => {
+    countUniqueUsers();
+  }, [messages]);
+
   const addMessageListener = () => {
     onChildAdded(child(messagesRef, currentChannel.id), (data) => {
       setMessages((prev) => [...prev, data.val()]);
@@ -40,9 +45,27 @@ const Messages = ({ currentChannel, currentUser }) => {
     }
   };
 
+  const displayChannelName = () =>
+    currentChannel ? `#${currentChannel?.name}` : "";
+
+  const countUniqueUsers = () => {
+    const uniqueUsers = messages.reduce((acc, message) => {
+      if (!acc.includes(message.user.name)) {
+        acc.push(message.user.name);
+      }
+      return acc;
+    }, []);
+
+    const plural = uniqueUsers.length > 1;
+    setNumUniqueUsers(`${uniqueUsers.length} user${plural ? "s" : ""}`);
+  };
+
   return (
     <>
-      <MessagesHeader />
+      <MessagesHeader
+        channelName={displayChannelName()}
+        numUniqueUsers={numUniqueUsers}
+      />
       <Segment>
         <Comment.Group
           className={progressBar ? "messages__progress" : "messages"}

@@ -119,6 +119,7 @@ const MessageForm = ({
           labelPosition="right"
           icon="cloud upload"
           onClick={() => setModal(true)}
+          disabled={percentUploaded > 0}
         />
       </Button.Group>
       <FileModal
