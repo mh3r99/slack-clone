@@ -10,6 +10,8 @@ const Messages = ({ currentChannel, currentUser }) => {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [progressBar, setProgressBar] = useState(false);
   const [numUniqueUsers, setNumUniqueUsers] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   const database = getDatabase();
   const messagesRef = ref(database, "messages");
@@ -21,6 +23,7 @@ const Messages = ({ currentChannel, currentUser }) => {
 
     return () => {
       setMessages([]);
+      setSearchResults([]);
       setMessagesLoading(true);
       off(messagesRef);
     };
@@ -60,24 +63,47 @@ const Messages = ({ currentChannel, currentUser }) => {
     setNumUniqueUsers(`${uniqueUsers.length} user${plural ? "s" : ""}`);
   };
 
+  const handleSearchChange = (e) => {
+    setIsSearching(true);
+
+    const channelMessages = [...messages];
+    const regex = new RegExp(e.target.value, "gi");
+    const result = channelMessages.reduce((acc, message) => {
+      if (message?.content?.match(regex) || message?.user?.name?.match(regex)) {
+        acc.push(message);
+      }
+
+      return acc;
+    }, []);
+
+    setSearchResults(result);
+    setTimeout(() => setIsSearching(false), 1000);
+  };
+
+  const displayMessages = (messages) =>
+    messages.map((message) => (
+      <Message
+        key={message.timestamp}
+        message={message}
+        currentUser={currentUser}
+      />
+    ));
+
   return (
     <>
       <MessagesHeader
         channelName={displayChannelName()}
         numUniqueUsers={numUniqueUsers}
+        handleSearchChange={handleSearchChange}
+        isSearching={isSearching}
       />
       <Segment>
         <Comment.Group
           className={progressBar ? "messages__progress" : "messages"}
         >
-          {messages.length > 0 &&
-            messages.map((message) => (
-              <Message
-                key={message.timestamp}
-                message={message}
-                currentUser={currentUser}
-              />
-            ))}
+          {isSearching
+            ? displayMessages(searchResults)
+            : displayMessages(messages)}
         </Comment.Group>
       </Segment>
       <MessageForm
