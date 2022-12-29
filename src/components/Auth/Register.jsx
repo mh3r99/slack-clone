@@ -18,8 +18,11 @@ import md5 from "md5";
 import { db } from "../../firebase";
 import { getDatabase, ref, set, child } from "firebase/database";
 import { useAuthStatus } from "../hooks/useAuthStatus";
+import { setLoggedUser } from "../../store/features/userSlice";
+import { useDispatch } from "react-redux";
 
 const Register = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
@@ -66,6 +69,15 @@ const Register = () => {
           name: user.displayName,
           avatar: user.photoURL,
         });
+
+        dispatch(
+          setLoggedUser({
+            id: user.uid,
+            name: user.displayName,
+            email: user.email,
+            avatar: user.photoURL,
+          })
+        );
       } catch (error) {
         setError(error.message);
       }

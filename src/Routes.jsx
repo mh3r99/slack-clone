@@ -28,9 +28,8 @@ const AppRoutes = () => {
         dispatch(clearUser());
       }
     });
-
     return () => unsubscribed();
-  }, [dispatch]);
+  }, [dispatch, auth]);
 
   return (
     <>
