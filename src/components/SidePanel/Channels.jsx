@@ -15,7 +15,7 @@ import {
   setPrivateChannel,
 } from "../../store/features/channelsSlice";
 
-const Channels = ({ currentUser }) => {
+const Channels = ({ currentUser, isPrivateChannel }) => {
   const dispatch = useDispatch();
   const database = getDatabase();
   const channelsRef = ref(database, "channels");
@@ -99,7 +99,7 @@ const Channels = ({ currentUser }) => {
         onClick={() => changeChannel(channel)}
         name={channel.name}
         style={{ opacity: 0.7 }}
-        active={channel.id === activeChannel}
+        active={channel.id === activeChannel && !isPrivateChannel}
       >
         # {channel.name}
       </Menu.Item>

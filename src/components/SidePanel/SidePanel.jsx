@@ -4,7 +4,7 @@ import Channels from "./Channels";
 import DirectMessages from "./DirectMessages";
 import UserPanel from "./UserPanel";
 
-const SidePanel = ({ currentUser }) => {
+const SidePanel = ({ currentUser, isPrivateChannel }) => {
   return (
     <Menu
       size="large"
@@ -14,8 +14,11 @@ const SidePanel = ({ currentUser }) => {
       style={{ background: "#4c3c4c", fontSize: "1.2rem" }}
     >
       <UserPanel currentUser={currentUser} />
-      <Channels currentUser={currentUser} />
-      <DirectMessages currentUser={currentUser} />
+      <Channels currentUser={currentUser} isPrivateChannel={isPrivateChannel} />
+      <DirectMessages
+        currentUser={currentUser}
+        isPrivateChannel={isPrivateChannel}
+      />
     </Menu>
   );
 };

@@ -17,7 +17,7 @@ import {
   setPrivateChannel,
 } from "../../store/features/channelsSlice";
 
-const DirectMessages = ({ currentUser }) => {
+const DirectMessages = ({ currentUser, isPrivateChannel }) => {
   const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -109,7 +109,7 @@ const DirectMessages = ({ currentUser }) => {
           key={user.id}
           onClick={() => changeChannel(user)}
           style={{ opacity: 0.7, fontStyle: "italic" }}
-          active={activeChannel === user.id}
+          active={activeChannel === user.id && isPrivateChannel}
         >
           <Icon
             name="circle"

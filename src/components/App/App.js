@@ -20,7 +20,10 @@ function App() {
       ) : (
         <Grid columns="equal" className="app" style={{ background: "#eee" }}>
           <ColorPanel />
-          <SidePanel currentUser={currentUser} />
+          <SidePanel
+            currentUser={currentUser}
+            isPrivateChannel={isPrivateChannel}
+          />
           <Grid.Column style={{ marginLeft: 320 }}>
             <Messages
               currentChannel={currentChannel}
