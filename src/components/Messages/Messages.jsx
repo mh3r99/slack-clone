@@ -5,7 +5,7 @@ import MessagesHeader from "./MessagesHeader";
 import { getDatabase, ref, child, onChildAdded, off } from "firebase/database";
 import Message from "./Message";
 
-const Messages = ({ currentChannel, currentUser }) => {
+const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [progressBar, setProgressBar] = useState(false);
@@ -15,6 +15,7 @@ const Messages = ({ currentChannel, currentUser }) => {
 
   const database = getDatabase();
   const messagesRef = ref(database, "messages");
+  const privateMessagesRef = ref(database, "privateMessages");
 
   useEffect(() => {
     if (currentChannel) {
@@ -34,7 +35,7 @@ const Messages = ({ currentChannel, currentUser }) => {
   }, [messages]);
 
   const addMessageListener = () => {
-    onChildAdded(child(messagesRef, currentChannel.id), (data) => {
+    onChildAdded(child(getMessagesRef(), currentChannel.id), (data) => {
       setMessages((prev) => [...prev, data.val()]);
       setMessagesLoading(false);
     });
@@ -49,7 +50,9 @@ const Messages = ({ currentChannel, currentUser }) => {
   };
 
   const displayChannelName = () =>
-    currentChannel ? `#${currentChannel?.name}` : "";
+    currentChannel
+      ? `${isPrivateChannel ? "@" : "#"}${currentChannel.name}`
+      : "";
 
   const countUniqueUsers = () => {
     const uniqueUsers = messages.reduce((acc, message) => {
@@ -62,6 +65,9 @@ const Messages = ({ currentChannel, currentUser }) => {
     const plural = uniqueUsers.length > 1;
     setNumUniqueUsers(`${uniqueUsers.length} user${plural ? "s" : ""}`);
   };
+
+  const getMessagesRef = () =>
+    isPrivateChannel ? privateMessagesRef : messagesRef;
 
   const handleSearchChange = (e) => {
     setIsSearching(true);
@@ -96,6 +102,7 @@ const Messages = ({ currentChannel, currentUser }) => {
         numUniqueUsers={numUniqueUsers}
         handleSearchChange={handleSearchChange}
         isSearching={isSearching}
+        isPrivateChannel={isPrivateChannel}
       />
       <Segment>
         <Comment.Group
@@ -111,6 +118,8 @@ const Messages = ({ currentChannel, currentUser }) => {
         currentChannel={currentChannel}
         currentUser={currentUser}
         isProgressBarVisible={isProgressBarVisible}
+        isPrivateChannel={isPrivateChannel}
+        getMessagesRef={getMessagesRef}
       />
     </>
   );

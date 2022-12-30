@@ -10,7 +10,10 @@ import {
   off,
 } from "firebase/database";
 import { useDispatch } from "react-redux";
-import { setCurrentChannel } from "../../store/features/channelsSlice";
+import {
+  setCurrentChannel,
+  setPrivateChannel,
+} from "../../store/features/channelsSlice";
 
 const Channels = ({ currentUser }) => {
   const dispatch = useDispatch();
@@ -85,6 +88,7 @@ const Channels = ({ currentUser }) => {
   const changeChannel = (channel) => {
     setActiveChannel(channel.id);
     dispatch(setCurrentChannel(channel));
+    dispatch(setPrivateChannel(false));
   };
 
   const displayChannels = () =>

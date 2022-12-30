@@ -16,6 +16,8 @@ const MessageForm = ({
   currentChannel,
   currentUser,
   isProgressBarVisible,
+  isPrivateChannel,
+  getMessagesRef,
 }) => {
   const [message, setMessage] = useState("");
   const [uploadState, setUploadState] = useState("");
@@ -46,7 +48,7 @@ const MessageForm = ({
         newMessage["image"] = fileUrl;
       }
 
-      await push(child(messagesRef, currentChannel.id), newMessage);
+      await push(child(getMessagesRef(), currentChannel.id), newMessage);
 
       setLoading(false);
       setMessage("");
@@ -55,10 +57,18 @@ const MessageForm = ({
     }
   };
 
+  const getImagePath = () => {
+    if (isPrivateChannel) {
+      return `chat/private-${currentChannel.id}`;
+    } else {
+      return `chat/public`;
+    }
+  };
+
   const uploadFile = async (file) => {
     return new Promise((resolve, reject) => {
       const storage = getStorage();
-      const storageRef = ref(storage, `chat/public/${uuidv4()}.jpg`);
+      const storageRef = ref(storage, `${getImagePath()}/${uuidv4()}.jpg`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(

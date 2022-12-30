@@ -9,7 +9,9 @@ import { Navigate } from "react-router-dom";
 
 function App() {
   const { currentUser } = useSelector((state) => state.user);
-  const { currentChannel } = useSelector((state) => state.channels);
+  const { currentChannel, isPrivateChannel } = useSelector(
+    (state) => state.channels
+  );
 
   return (
     <>
@@ -23,6 +25,7 @@ function App() {
             <Messages
               currentChannel={currentChannel}
               currentUser={currentUser}
+              isPrivateChannel={isPrivateChannel}
             />
           </Grid.Column>
           <Grid.Column width={4}>

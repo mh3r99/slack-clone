@@ -11,10 +11,18 @@ import {
   onChildRemoved,
   off,
 } from "firebase/database";
+import { useDispatch } from "react-redux";
+import {
+  setCurrentChannel,
+  setPrivateChannel,
+} from "../../store/features/channelsSlice";
 
 const DirectMessages = ({ currentUser }) => {
+  const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
+  const [activeChannel, setActiveChannel] = useState("");
+
   const database = getDatabase();
   const usersRef = ref(database, "users");
   const connectedRef = ref(database, ".info/connected");
@@ -69,6 +77,25 @@ const DirectMessages = ({ currentUser }) => {
     return () => off(statusRef);
   }, [users]);
 
+  const changeChannel = (user) => {
+    const channelId = getChannelId(user.id);
+
+    const channelData = {
+      id: channelId,
+      name: user.name,
+    };
+
+    dispatch(setCurrentChannel(channelData));
+    dispatch(setPrivateChannel(true));
+    setActiveChannel(user.id);
+  };
+
+  const getChannelId = (userId) => {
+    return userId < currentUser.id
+      ? `${userId}/${currentUser.id}`
+      : `${currentUser.id}/${userId}`;
+  };
+
   return (
     <Menu.Menu className="menu">
       <Menu.Item>
@@ -80,8 +107,9 @@ const DirectMessages = ({ currentUser }) => {
       {users.map((user) => (
         <Menu.Item
           key={user.id}
-          onClick={() => console.log(user)}
+          onClick={() => changeChannel(user)}
           style={{ opacity: 0.7, fontStyle: "italic" }}
+          active={activeChannel === user.id}
         >
           <Icon
             name="circle"
