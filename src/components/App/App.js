@@ -22,6 +22,7 @@ function App() {
           <ColorPanel />
           <SidePanel
             currentUser={currentUser}
+            currentChannel={currentChannel}
             isPrivateChannel={isPrivateChannel}
           />
           <Grid.Column style={{ marginLeft: 320 }}>
@@ -41,3 +42,5 @@ function App() {
 }
 
 export default App;
+
+
