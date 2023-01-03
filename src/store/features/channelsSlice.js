@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   currentChannel: null,
-  isPrivateChannel: false,
+  favoriteChannels: [],
 };
 
 const channelsSlice = createSlice({
@@ -12,12 +12,24 @@ const channelsSlice = createSlice({
     setCurrentChannel: (state, action) => {
       state.currentChannel = action.payload;
     },
-    setPrivateChannel: (state, action) => {
-      state.isPrivateChannel = action.payload;
+    setFavoriteChannel: (state, action) => {
+      let channelId = action.payload.channelId;
+      if (
+        !state.favoriteChannels.find(
+          (channel) => channel.channelId === channelId
+        )
+      )
+        state.favoriteChannels.push(action.payload);
+    },
+    removeFavoriteChannel: (state, action) => {
+      state.favoriteChannels = state.favoriteChannels.filter(
+        (channel) => channel.channelId !== action.payload.channelId
+      );
     },
   },
 });
 
-export const { setCurrentChannel, setPrivateChannel } = channelsSlice.actions;
+export const { setCurrentChannel, setFavoriteChannel, removeFavoriteChannel } =
+  channelsSlice.actions;
 
 export default channelsSlice.reducer;

@@ -9,7 +9,7 @@ import { Navigate } from "react-router-dom";
 
 function App() {
   const { currentUser } = useSelector((state) => state.user);
-  const { currentChannel, isPrivateChannel } = useSelector(
+  const { currentChannel, favoriteChannels } = useSelector(
     (state) => state.channels
   );
 
@@ -23,13 +23,13 @@ function App() {
           <SidePanel
             currentUser={currentUser}
             currentChannel={currentChannel}
-            isPrivateChannel={isPrivateChannel}
+            favoriteChannels={favoriteChannels}
           />
           <Grid.Column style={{ marginLeft: 320 }}>
             <Messages
               currentChannel={currentChannel}
               currentUser={currentUser}
-              isPrivateChannel={isPrivateChannel}
+              favoriteChannels={favoriteChannels}
             />
           </Grid.Column>
           <Grid.Column width={4}>
@@ -42,5 +42,3 @@ function App() {
 }
 
 export default App;
-
-

@@ -2,10 +2,10 @@ import React from "react";
 import { Menu } from "semantic-ui-react";
 import Channels from "./Channels";
 import DirectMessages from "./DirectMessages";
-import Starred from "./Starred";
+import FavoriteChannels from "./FavoriteChannels";
 import UserPanel from "./UserPanel";
 
-const SidePanel = ({ currentUser, currentChannel, isPrivateChannel }) => {
+const SidePanel = ({ currentUser, currentChannel, favoriteChannels }) => {
   return (
     <Menu
       size="large"
@@ -15,15 +15,15 @@ const SidePanel = ({ currentUser, currentChannel, isPrivateChannel }) => {
       style={{ background: "#4c3c4c", fontSize: "1.2rem" }}
     >
       <UserPanel currentUser={currentUser} />
-      <Starred />
-      <Channels
+      <FavoriteChannels
         currentUser={currentUser}
         currentChannel={currentChannel}
-        isPrivateChannel={isPrivateChannel}
+        favoriteChannels={favoriteChannels}
       />
+      <Channels currentUser={currentUser} currentChannel={currentChannel} />
       <DirectMessages
         currentUser={currentUser}
-        isPrivateChannel={isPrivateChannel}
+        currentChannel={currentChannel}
       />
     </Menu>
   );

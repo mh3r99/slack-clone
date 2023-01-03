@@ -12,12 +12,9 @@ import {
   off,
 } from "firebase/database";
 import { useDispatch } from "react-redux";
-import {
-  setCurrentChannel,
-  setPrivateChannel,
-} from "../../store/features/channelsSlice";
+import { setCurrentChannel } from "../../store/features/channelsSlice";
 
-const DirectMessages = ({ currentUser, isPrivateChannel }) => {
+const DirectMessages = ({ currentUser, currentChannel }) => {
   const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -85,8 +82,9 @@ const DirectMessages = ({ currentUser, isPrivateChannel }) => {
       name: user.name,
     };
 
-    dispatch(setCurrentChannel(channelData));
-    dispatch(setPrivateChannel(true));
+    dispatch(
+      setCurrentChannel({ ...channelData, isPrivate: true, isFavorite: false })
+    );
     setActiveChannel(user.id);
   };
 
@@ -100,7 +98,7 @@ const DirectMessages = ({ currentUser, isPrivateChannel }) => {
     <Menu.Menu className="menu">
       <Menu.Item>
         <span>
-          <Icon name="mail" /> DIRECT MESSAGES
+          <Icon name="star" /> DIRECT MESSAGES
         </span>{" "}
         ({users.length})
       </Menu.Item>
@@ -109,7 +107,7 @@ const DirectMessages = ({ currentUser, isPrivateChannel }) => {
           key={user.id}
           onClick={() => changeChannel(user)}
           style={{ opacity: 0.7, fontStyle: "italic" }}
-          active={activeChannel === user.id && isPrivateChannel}
+          active={activeChannel === user.id && currentChannel.isPrivate}
         >
           <Icon
             name="circle"

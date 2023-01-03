@@ -19,12 +19,9 @@ import {
   onValue,
 } from "firebase/database";
 import { useDispatch } from "react-redux";
-import {
-  setCurrentChannel,
-  setPrivateChannel,
-} from "../../store/features/channelsSlice";
+import { setCurrentChannel } from "../../store/features/channelsSlice";
 
-const Channels = ({ currentUser, currentChannel, isPrivateChannel }) => {
+const Channels = ({ currentUser, currentChannel }) => {
   const dispatch = useDispatch();
   const database = getDatabase();
 
@@ -52,7 +49,13 @@ const Channels = ({ currentUser, currentChannel, isPrivateChannel }) => {
   useEffect(() => {
     if (firstLoad && channels.length > 0) {
       let firstChannel = channels[0];
-      dispatch(setCurrentChannel(firstChannel));
+      dispatch(
+        setCurrentChannel({
+          ...firstChannel,
+          isPrivate: false,
+          isFavorite: false,
+        })
+      );
       setActiveChannel(firstChannel.id);
       setFirstLoad(false);
     }
@@ -144,8 +147,9 @@ const Channels = ({ currentUser, currentChannel, isPrivateChannel }) => {
   const changeChannel = (channel) => {
     setActiveChannel(channel.id);
     clearNotifications();
-    dispatch(setCurrentChannel(channel));
-    dispatch(setPrivateChannel(false));
+    dispatch(
+      setCurrentChannel({ ...channel, isPrivate: false, isFavorite: false })
+    );
   };
 
   const clearNotifications = () => {
@@ -182,7 +186,11 @@ const Channels = ({ currentUser, currentChannel, isPrivateChannel }) => {
         onClick={() => changeChannel(channel)}
         name={channel.name}
         style={{ opacity: 0.7 }}
-        active={channel.id === activeChannel && !isPrivateChannel}
+        active={
+          channel.id === activeChannel &&
+          !currentChannel.isPrivate &&
+          !currentChannel.isFavorite
+        }
       >
         {getNotificationsCount(channel) && (
           <Label color="red">{getNotificationsCount(channel)}</Label>

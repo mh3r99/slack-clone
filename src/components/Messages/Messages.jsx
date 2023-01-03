@@ -2,10 +2,26 @@ import React, { useEffect, useState } from "react";
 import { Segment, Comment } from "semantic-ui-react";
 import MessageForm from "./MessageForm";
 import MessagesHeader from "./MessagesHeader";
-import { getDatabase, ref, child, onChildAdded, off } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  child,
+  onChildAdded,
+  onChildRemoved,
+  off,
+  update,
+  remove,
+  set,
+} from "firebase/database";
 import Message from "./Message";
+import { useDispatch } from "react-redux";
+import {
+  removeFavoriteChannel,
+  setFavoriteChannel,
+} from "../../store/features/channelsSlice";
 
-const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
+const Messages = ({ currentChannel, currentUser, favoriteChannels }) => {
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [progressBar, setProgressBar] = useState(false);
@@ -16,6 +32,7 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
   const database = getDatabase();
   const messagesRef = ref(database, "messages");
   const privateMessagesRef = ref(database, "privateMessages");
+  const usersRef = ref(database, "users");
 
   useEffect(() => {
     if (currentChannel) {
@@ -34,6 +51,18 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
     countUniqueUsers();
   }, [messages]);
 
+  useEffect(() => {
+    if (currentUser) {
+      onChildAdded(child(usersRef, `${currentUser.id}/favorite`), (data) => {
+        dispatch(setFavoriteChannel(data.val()));
+      });
+
+      onChildRemoved(child(usersRef, `${currentUser.id}/favorite`), (data) => {
+        dispatch(removeFavoriteChannel(data.val()));
+      });
+    }
+  }, [currentUser]);
+
   const addMessageListener = () => {
     onChildAdded(child(getMessagesRef(), currentChannel.id), (data) => {
       setMessages((prev) => [...prev, data.val()]);
@@ -51,7 +80,7 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
 
   const displayChannelName = () =>
     currentChannel
-      ? `${isPrivateChannel ? "@" : "#"}${currentChannel.name}`
+      ? `${currentChannel.isPrivate ? "@" : "#"}${currentChannel.name}`
       : "";
 
   const countUniqueUsers = () => {
@@ -67,7 +96,7 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
   };
 
   const getMessagesRef = () =>
-    isPrivateChannel ? privateMessagesRef : messagesRef;
+    currentChannel?.isPrivate ? privateMessagesRef : messagesRef;
 
   const handleSearchChange = (e) => {
     setIsSearching(true);
@@ -86,6 +115,26 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
     setTimeout(() => setIsSearching(false), 1000);
   };
 
+  const handleStar = () => {
+    let favoriteRef = child(
+      usersRef,
+      `${currentUser.id}/favorite/${currentChannel.id}`
+    );
+    if (isChannelStarred()) {
+      remove(favoriteRef);
+    } else {
+      set(favoriteRef, {
+        channelId: currentChannel.id,
+        channelName: currentChannel.name,
+      });
+    }
+  };
+
+  const isChannelStarred = () =>
+    favoriteChannels.find(
+      (channel) => channel.channelId === currentChannel?.id
+    );
+
   const displayMessages = (messages) =>
     messages.map((message) => (
       <Message
@@ -102,7 +151,9 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
         numUniqueUsers={numUniqueUsers}
         handleSearchChange={handleSearchChange}
         isSearching={isSearching}
-        isPrivateChannel={isPrivateChannel}
+        isPrivateChannel={currentChannel?.isPrivate}
+        handleStar={handleStar}
+        isChannelStarred={isChannelStarred()}
       />
       <Segment>
         <Comment.Group
@@ -118,7 +169,7 @@ const Messages = ({ currentChannel, currentUser, isPrivateChannel }) => {
         currentChannel={currentChannel}
         currentUser={currentUser}
         isProgressBarVisible={isProgressBarVisible}
-        isPrivateChannel={isPrivateChannel}
+        isPrivateChannel={currentChannel?.isPrivate}
         getMessagesRef={getMessagesRef}
       />
     </>
