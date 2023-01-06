@@ -10,9 +10,11 @@ import {
   onDisconnect,
   onChildRemoved,
   off,
+  serverTimestamp,
 } from "firebase/database";
 import { useDispatch } from "react-redux";
 import { setCurrentChannel } from "../../store/features/channelsSlice";
+import Notification from "./Notification";
 
 const DirectMessages = ({ currentUser, currentChannel }) => {
   const dispatch = useDispatch();
@@ -77,6 +79,9 @@ const DirectMessages = ({ currentUser, currentChannel }) => {
   const changeChannel = (user) => {
     const channelId = getChannelId(user.id);
 
+    setLastVisited(currentUser, currentChannel);
+    setLastVisited(currentUser, user);
+
     const channelData = {
       id: channelId,
       name: user.name,
@@ -90,8 +95,18 @@ const DirectMessages = ({ currentUser, currentChannel }) => {
 
   const getChannelId = (userId) => {
     return userId < currentUser.id
-      ? `${userId}/${currentUser.id}`
-      : `${currentUser.id}/${userId}`;
+      ? `${userId}+${currentUser.id}`
+      : `${currentUser.id}+${userId}`;
+  };
+
+  const setLastVisited = (user, channel) => {
+    const lastVisitedRef = child(
+      usersRef,
+      `${user.id}/lastVisited/${channel.id}`
+    );
+
+    set(lastVisitedRef, serverTimestamp());
+    onDisconnect(lastVisitedRef).set(serverTimestamp());
   };
 
   return (
@@ -113,7 +128,12 @@ const DirectMessages = ({ currentUser, currentChannel }) => {
             name="circle"
             color={connectedUsers.indexOf(user.id) !== -1 ? "green" : "red"}
           />
-          @ {user.name}
+          @ {user.name}{" "}
+          <Notification
+            user={currentUser}
+            channel={currentChannel}
+            notificationChannelId={getChannelId(user.id)}
+          />
         </Menu.Item>
       ))}
     </Menu.Menu>

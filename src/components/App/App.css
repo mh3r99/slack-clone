@@ -6,6 +6,10 @@ body,
   padding: 1em;
 }
 
+.side_bar {
+  overflow-y: auto;
+}
+
 /* Sidepanel */
 .menu {
   padding-bottom: 2em;

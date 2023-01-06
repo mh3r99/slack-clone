@@ -28,8 +28,6 @@ const Channels = ({ currentUser, currentChannel }) => {
   const channelsRef = ref(database, "channels");
   const messagesRef = ref(database, "messages");
 
-  const [notifications, setNotifications] = useState([]);
-
   const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState("");
   const [modal, setModal] = useState(false);
@@ -64,49 +62,7 @@ const Channels = ({ currentUser, currentChannel }) => {
   const addListeners = () => {
     onChildAdded(channelsRef, (data) => {
       setChannels((prev) => [...prev, data.val()]);
-
-      addNotificationsListener(data.key);
     });
-  };
-
-  const addNotificationsListener = (channelId) => {
-    onValue(child(messagesRef, channelId), (snap) => {
-      if (currentChannel) {
-        handleNotifications(channelId, currentChannel.id, notifications, snap);
-      }
-    });
-  };
-
-  const handleNotifications = (
-    channelId,
-    currentChannelId,
-    notifications,
-    snap
-  ) => {
-    let lastTotal = 0;
-
-    let index = notifications.findIndex(
-      (notifications) => notifications.id === channelId
-    );
-    if (index !== -1) {
-      if (channelId !== currentChannelId) {
-        lastTotal = notifications[index].total;
-
-        if (snap.numChildren() - lastTotal > 0) {
-          notifications[index].count = snap.numChildren() - lastTotal;
-        }
-      }
-      notifications[index].lastKnowTotal = snap.numChildren();
-    } else {
-      notifications.push({
-        id: channelId,
-        total: snap.numChildren(),
-        lastKnowTotal: snap.numChildren(),
-        count: 0,
-      });
-    }
-
-    setNotifications(notifications);
   };
 
   const handleChange = (e) => {
@@ -146,36 +102,9 @@ const Channels = ({ currentUser, currentChannel }) => {
 
   const changeChannel = (channel) => {
     setActiveChannel(channel.id);
-    clearNotifications();
     dispatch(
       setCurrentChannel({ ...channel, isPrivate: false, isFavorite: false })
     );
-  };
-
-  const clearNotifications = () => {
-    let index = notifications.findIndex(
-      (notification) => notification.id === currentChannel.id
-    );
-
-    if (index !== -1) {
-      let updatedNotifications = [...notifications];
-      updatedNotifications[index].total = notifications[index].lastKnowTotal;
-      updatedNotifications[index].count = 0;
-
-      setNotifications(updatedNotifications);
-    }
-  };
-
-  const getNotificationsCount = (channel) => {
-    let count = 0;
-
-    notifications.forEach((notification) => {
-      if (notification.id === channel.id) {
-        count = notification.count;
-      }
-    });
-
-    if (count > 0) return count;
   };
 
   const displayChannels = () =>
@@ -192,9 +121,9 @@ const Channels = ({ currentUser, currentChannel }) => {
           !currentChannel.isFavorite
         }
       >
-        {getNotificationsCount(channel) && (
+        {/* {getNotificationsCount(channel) && (
           <Label color="red">{getNotificationsCount(channel)}</Label>
-        )}
+        )} */}
         # {channel.name}
       </Menu.Item>
     ));

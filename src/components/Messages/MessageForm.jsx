@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
-import { push, child, serverTimestamp } from "firebase/database";
+import { push, child, serverTimestamp, set } from "firebase/database";
 import FileModal from "./FileModal";
 import { v4 as uuidv4 } from "uuid";
 import {
